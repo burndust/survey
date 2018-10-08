@@ -1,0 +1,1 @@
+ALTER TABLE `survey` ADD `create_time` INT NULL AFTER `description`, ADD `update_time` INT NULL AFTER `create_time`, ADD `delete_time` INT NULL AFTER `update_time`;
