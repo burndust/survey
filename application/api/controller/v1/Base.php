@@ -40,7 +40,8 @@ class Base extends Controller implements Constant
         parent::__construct($request);
         $this->user = User::get(4);
         $this->checkLogin && $this->isLogin();
-        $this->params = camelToUnderLineArr(request()->param());
+        $method = request()->method();
+        $this->params = camelToUnderLineArr(request()->$method());
     }
 
     /**

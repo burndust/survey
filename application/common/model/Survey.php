@@ -14,4 +14,8 @@ class Survey extends Base
 {
     use SoftDelete;
     protected $autoWriteTimestamp = true;
+    protected $hidden = ['user_id', 'create_time', 'update_time', 'delete_time'];
+    public function questions(){
+        return $this->hasMany('Question','survey_id');
+    }
 }

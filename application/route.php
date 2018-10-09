@@ -11,5 +11,12 @@
 
 use think\Route;
 Route::group('api/:version',function(){
-    Route::resource('/survey','api/:version.survey');
+    Route::group('/survey',function(){
+        Route::resource('','api/:version.survey');
+        Route::get('/:id/info','api/:version.survey/info');
+        Route::post('/:id/questions', 'api/:version.survey/questions',[],['id' => '\d+']);
+    });
+    Route::group('/question',function(){
+        Route::get('/index/:surveyId', 'api/:version.question/index',[],['surveyId' => '\d+']);
+    });
 });

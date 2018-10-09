@@ -20,6 +20,7 @@
  */
 function show($data, $code = 0, $message = 'ok', $statusCode = 200)
 {
+    $data = $data?underLineArrTOCamel($data):$data;
     $data = [
         'code'    => empty($code) ? config('code.success') : $code,
         'message' => $message,
@@ -57,12 +58,32 @@ function camelToUnderLineArr($fields)
  * @param $fields [] 下划线数组
  * @return \stdClass
  */
+//function underLineArrTOCamel($fields)
+//{
+//    /*if(is_object($fields)){
+//        $fields = $fields->toArray();
+//    }*/
+//    $newObj = new \stdClass();
+//    if (!is_array($fields) || !$fields) return null;
+//    foreach ($fields as $key => $v) {
+//        if(is_array($v)){
+//            $v = underLineArrTOCamel($v);
+//        }
+//        $keyTmp          = array_reduce(explode('_', $key), function ($v1, $v2) {
+//            return ucfirst($v1) . ucfirst($v2);
+//        });
+//        $keyTmp          = lcfirst($keyTmp);
+//        $newObj->$keyTmp = $v;
+//        unset($fields[$key]);
+//    }
+//    return $newObj;
+//}
 function underLineArrTOCamel($fields)
 {
     /*if(is_object($fields)){
         $fields = $fields->toArray();
     }*/
-    $newObj = new \stdClass();
+    $newArr = [];
     if (!is_array($fields) || !$fields) return null;
     foreach ($fields as $key => $v) {
         if(is_array($v)){
@@ -72,10 +93,10 @@ function underLineArrTOCamel($fields)
             return ucfirst($v1) . ucfirst($v2);
         });
         $keyTmp          = lcfirst($keyTmp);
-        $newObj->$keyTmp = $v;
+        $newArr[$keyTmp] = $v;
         unset($fields[$key]);
     }
-    return $newObj;
+    return $newArr;
 }
 
 function getMillisecond(){
