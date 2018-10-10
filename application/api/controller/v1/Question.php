@@ -12,7 +12,8 @@ use app\common\model\Question as QuestionModel;
 
 class Question extends Base
 {
-    public function index(){
-
+    public function delete($id){
+        QuestionModel::destroy($id);
+        return show([]);
     }
 }

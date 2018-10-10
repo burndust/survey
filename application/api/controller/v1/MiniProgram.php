@@ -87,13 +87,4 @@ class MiniProgram extends Base
         $token = (new Aes())->encrypt($token . '||' . $miniUser['user_id']);
         return show(['token' => $token]);
     }
-
-    public function test()
-    {
-        $token     = Token::generate();
-        $aes       = new Aes();
-        $token     = 'H0bpaLCaaVxb4atEZr3DNc28Ea1Xf8LSnaOR7PRKJdz4kGkhvh6WQ5IqhdfzE1aF5UYn9ZXp9dZeTb3F3xHbEQ==';
-        $decrypted = $aes->decrypt($token);
-        return show(['token' => $token, 'desc' => $decrypted]);
-    }
 }

@@ -17,6 +17,7 @@ Route::group('api/:version',function(){
         Route::post('/:id/questions', 'api/:version.survey/questions',[],['id' => '\d+']);
     });
     Route::group('/question',function(){
+        Route::resource('','api/:version.question');
         Route::get('/index/:surveyId', 'api/:version.question/index',[],['surveyId' => '\d+']);
     });
 });

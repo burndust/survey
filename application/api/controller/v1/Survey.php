@@ -67,15 +67,8 @@ class Survey extends Base
         }
         Question::startTrans();
         try {
-            $questionDelList = [];//问题删除列表
-            $optionDelList   = [];//问题选项删除列表
             foreach ($questions as $k => $v) {
                 //校验参数没有错误
-                //存在delete参数，表示删除
-                if (!empty($v['delete']) && !empty($v['id'])) {
-                    $questionDelList[] = $v['id'];
-                    continue;
-                }
                 //存在问题id,则表示更新
                 if (!empty($v['id'])) {
                     $data = [
@@ -86,10 +79,6 @@ class Survey extends Base
                     Question::where(['id' => $v['id']])->update($data);
                     if (!empty($v['option'])) {
                         foreach ($v['option'] as $vk => $vv) {
-                            if (!empty($vv['delete']) && !empty($vv['id'])) {
-                                $optionDelList[] = $vv['id'];
-                                continue;
-                            }
                             //存在选项id,则表示更新
                             if (!empty($vv['id'])) {
                                 QuestionOption::where(['id' => $vv['id']])->update(['content' => $vv['content']]);
@@ -105,8 +94,11 @@ class Survey extends Base
                 $question       = Question::create($v, true);
                 if (!empty($v['option'])) $question->option()->saveAll($v['option']);
             }
-            if (!empty($questionDelList)) Question::destroy($questionDelList);
-            if (!empty($optionDelList)) QuestionOption::destroy($optionDelList);
+            if(!empty($this->params['question_del_list'])){
+                Question::destroy($this->params['question_del_list']);
+            }
+            if (!empty($this->params['question_del_list'])) Question::destroy($this->params['question_del_list']);
+            if (!empty($this->params['option_del_list'])) Question::destroy($this->params['option_del_list']);
             Question::commit();
             return show([]);
         } catch (\Exception $e) {
@@ -116,7 +108,9 @@ class Survey extends Base
     }
 
     public function info($id){
-        $result = SurveyModel::get($id,['questions' => ['option']])->toArray();
+        $result = SurveyModel::get($id,['questions' => function($query){
+            $query->with(['option'])->order('sort');
+        }])->toArray();
         return show($result);
     }
 }
