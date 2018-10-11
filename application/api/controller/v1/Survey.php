@@ -17,7 +17,7 @@ class Survey extends Base
 {
     public function index()
     {
-        $result = SurveyModel::all();
+        $result = SurveyModel::all(['user_id' => $this->user['id']]);
         $result = $result ? collection($result)->toArray() : [];
         return show($result);
     }

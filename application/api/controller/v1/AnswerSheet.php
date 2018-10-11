@@ -10,6 +10,7 @@ namespace app\api\controller\v1;
 
 use app\common\model\Answer;
 use app\common\model\AnswerSheet as AnswerSheetModel;
+use app\common\model\QuestionOption;
 use app\common\model\Survey;
 use think\Db;
 
@@ -25,16 +26,25 @@ class AnswerSheet extends Base
         try {
             $answerSheet = AnswerSheetModel::Create($data);
             $questions   = $this->params['questions'];
+            $pollList = [];
             foreach ($questions as $k => $v) {
                 $answer = Answer::create([
                     'answer_sheet_id' => $answerSheet['id'],
                     'question_id'     => $v['id'],
                 ]);
-                if (!empty($v['option'])) $answer->option()->saveAll($v['option']);
-                if (!empty($v['content'])) $answer->content()->save($v['content']);
+                if (!empty($v['selected_list'])){
+                    $option = [];
+                    foreach ($v['selected_list'] as $vk => $vv){
+                        $pollList[] = $vv;
+                        $option[] = ['option_id' => $vv];
+                    }
+                    $answer->option()->saveAll($option);
+                }
+                if (!empty($v['content'])) $answer->content()->save(['content' => $v['content']]);
             }
-            Survey::where(['survey_id' => $this->params['survey_id']])
-                ->update(['sheet_count' => ['exp', Db::raw('sheet_count+1')]]);
+            Survey::where(['id' => $this->params['survey_id']])
+                ->update(['sheet_count' => Db::raw('sheet_count+1')]);
+            $pollList && QuestionOption::where(['id' => ['in',$pollList]])->update(['poll' => Db::raw('poll+1')]);
             AnswerSheetModel::commit();
             return show([]);
         } catch (\Exception $e) {

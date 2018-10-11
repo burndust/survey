@@ -13,6 +13,7 @@ use app\common\library\Aes;
 use app\common\library\Token;
 use app\common\model\MiniUser;
 use app\common\model\User;
+use app\common\model\Survey;
 use EasyWeChat\Factory;
 use think\Cache;
 
@@ -85,6 +86,8 @@ class MiniProgram extends Base
         $token = Token::generate();
         Cache::set($token, 1, config('token_cache_time'));
         $token = (new Aes())->encrypt($token . '||' . $miniUser['user_id']);
-        return show(['token' => $token]);
+        $result = Survey::all(['user_id' => $miniUser['user_id']]);
+        $result = $result ? collection($result)->toArray() : [];
+        return show(['token' => $token,'survey' => $result]);
     }
 }
