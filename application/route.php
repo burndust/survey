@@ -20,4 +20,7 @@ Route::group('api/:version',function(){
         Route::resource('','api/:version.question');
         Route::get('/index/:surveyId', 'api/:version.question/index',[],['surveyId' => '\d+']);
     });
+    Route::group('/answer_sheet', function () {
+        Route::resource('', 'api/:version.answer_sheet');
+    });
 });

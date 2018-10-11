@@ -37,7 +37,7 @@ class Survey extends Base
 
     public function update($id)
     {
-        $allowField = ['name', 'description'];
+        $allowField = ['status'];
         $survey     = SurveyModel::get($id);
         $survey->allowField($allowField)->save($this->params);
         return show([]);
@@ -51,7 +51,7 @@ class Survey extends Base
 
     public function questions($id)
     {
-        $allowField = ['name', 'description'];
+        $allowField = ['name', 'description', 'status'];
         $survey     = SurveyModel::get($id);
         $survey->allowField($allowField)->save($this->params);
         $questions = $this->params['questions'];
@@ -98,9 +98,12 @@ class Survey extends Base
                 Question::destroy($this->params['question_del_list']);
             }
             if (!empty($this->params['question_del_list'])) Question::destroy($this->params['question_del_list']);
-            if (!empty($this->params['option_del_list'])) Question::destroy($this->params['option_del_list']);
+            if (!empty($this->params['option_del_list'])) QuestionOption::destroy($this->params['option_del_list']);
             Question::commit();
-            return show([]);
+            $result = SurveyModel::get($id, ['questions' => function ($query) {
+                $query->with(['option'])->order('sort');
+            }])->toArray();
+            return show($result);
         } catch (\Exception $e) {
             Question::rollback();
             throw new \Exception($e->getMessage());
