@@ -124,9 +124,9 @@ class Survey extends Base
     public function sheets($id)
     {
         $result = AnswerSheet::all(['survey_id' => $id], ['answers' => [
-            'option' => ['questionOption'],
-            'contents',
-            'question'
+            'option' => ['bindQuestionOption'],
+            'bindContent',
+            'bindQuestion'
         ]]);
         $result = $result ? collection($result)->toArray() : [];
         return show($result);

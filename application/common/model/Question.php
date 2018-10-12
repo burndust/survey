@@ -14,4 +14,8 @@ class Question extends Base
     public function option(){
         return $this->hasMany('QuestionOption','question_id');
     }
+
+    public function answers(){
+        return $this->hasMany('Answer','question_id');
+    }
 }

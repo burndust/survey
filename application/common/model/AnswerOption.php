@@ -11,7 +11,7 @@ namespace app\common\model;
 
 class AnswerOption extends Base
 {
-    public function questionOption()
+    public function bindQuestionOption()
     {
         return $this->belongsTo('QuestionOption', 'option_id')
             ->bind([

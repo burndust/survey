@@ -16,7 +16,7 @@ class Answer extends Base
         return $this->hasMany('AnswerOption', 'answer_id');
     }
 
-    public function contents()
+    public function bindContent()
     {
         return $this->hasOne('AnswerContent', 'answer_id')
             ->bind([
@@ -24,7 +24,7 @@ class Answer extends Base
             ]);
     }
 
-    public function question()
+    public function bindQuestion()
     {
         return $this->belongsTo('Question', 'question_id')
             ->bind([

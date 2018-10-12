@@ -21,6 +21,7 @@ Route::group('api/:version',function(){
     });
     Route::group('/question',function(){
         Route::resource('','api/:version.question');
+        Route::get('/:id/answer_list', 'api/:version.question/answerList', [], ['id' => '\d+']);
     });
     Route::group('/answer_sheet', function () {
         Route::resource('', 'api/:version.answer_sheet');
