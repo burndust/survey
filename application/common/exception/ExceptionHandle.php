@@ -29,9 +29,9 @@ class ExceptionHandle extends Handle implements Constant
                 'level' => ['sql', 'error'],
             ]);
             Log::record($e->getFile() . ':' . $e->getLine(), 'error');
-        }
-        if (config('app_debug')) {
-            return parent::render($e);
+            if (config('app_debug')) {
+                return parent::render($e);
+            }
         }
         return show([], $this->code, $e->getMessage(), $this->statusCode);
     }
