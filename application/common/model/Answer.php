@@ -16,8 +16,19 @@ class Answer extends Base
         return $this->hasMany('AnswerOption', 'answer_id');
     }
 
-    public function content()
+    public function contents()
     {
-        return $this->hasOne('AnswerContent', 'answer_id');
+        return $this->hasOne('AnswerContent', 'answer_id')
+            ->bind([
+                'content'
+            ]);
+    }
+
+    public function question()
+    {
+        return $this->belongsTo('Question', 'question_id')
+            ->bind([
+                'name', 'type'
+            ]);
     }
 }

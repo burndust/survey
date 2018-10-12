@@ -8,10 +8,14 @@
 
 namespace app\api\controller\v1;
 
+use app\common\exception\BaseException;
 use app\common\exception\ParameterException;
 use app\common\model\QuestionOption;
 use app\common\model\Survey as SurveyModel;
 use app\common\model\Question;
+use app\common\model\AnswerSheet;
+use app\common\validate\IntegralValidate;
+use think\Db;
 
 class Survey extends Base
 {
@@ -115,5 +119,46 @@ class Survey extends Base
             $query->with(['option'])->order('sort');
         }])->toArray();
         return show($result);
+    }
+
+    public function sheets($id)
+    {
+        $result = AnswerSheet::all(['survey_id' => $id], ['answers' => [
+            'option' => ['questionOption'],
+            'contents',
+            'question'
+        ]]);
+        $result = $result ? collection($result)->toArray() : [];
+        return show($result);
+    }
+
+    public function statistics($id)
+    {
+        $result = Question::all(function ($query) use ($id) {
+            $query->where(['survey_id' => $id])->order('sort');
+        }, ['option']);
+        foreach ($result as $k => $v) {
+            if (!empty($v['option'])) {
+                $count = 0;
+                foreach ($v['option'] as $vv) {
+                    $count += $vv['poll'];
+                }
+                $v['count'] = $count;
+            }
+        }
+        $result = $result ? collection($result)->toArray() : [];
+        return show($result);
+    }
+
+    public function call($id)
+    {
+        new IntegralValidate();
+        if ($this->user['integral'] < $this->params['integral']) {
+            throw new BaseException('积分不足', self::INTEGRAL_NOT_WORTH);
+        }
+        $this->user->save(['integral' => $this->user['integral'] - $this->params['integral']]);
+        SurveyModel::where(['id' => $id])
+            ->update(['integral' => Db::raw('integral+' . $this->params['integral'])]);
+        return show([]);
     }
 }

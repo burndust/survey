@@ -42,6 +42,7 @@ class AnswerSheet extends Base
                 }
                 if (!empty($v['content'])) $answer->content()->save(['content' => $v['content']]);
             }
+            $this->user->save(['integral' => $this->user['integral'] + 1]);
             Survey::where(['id' => $this->params['survey_id']])
                 ->update(['sheet_count' => Db::raw('sheet_count+1')]);
             $pollList && QuestionOption::where(['id' => ['in',$pollList]])->update(['poll' => Db::raw('poll+1')]);

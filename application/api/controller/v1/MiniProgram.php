@@ -77,7 +77,7 @@ class MiniProgram extends Base
         $miniUser = MiniUser::get(['openid' => $response['openid']]);
         if (!$miniUser) {
             $miniUser = MiniUser::create(['openid' => $response['openid']], true);
-            if ($user = User::create(['integral' => 0])) {
+            if ($user = User::create(['integral' => 10])) {
                 $miniUser['user_id'] = $user['id'];
                 $miniUser->save();
             }

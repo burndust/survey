@@ -11,5 +11,8 @@ namespace app\common\model;
 
 class AnswerSheet extends Base
 {
-
+    public function answers()
+    {
+        return $this->hasMany('Answer', 'answer_sheet_id');
+    }
 }

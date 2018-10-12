@@ -6,3 +6,6 @@ ALTER TABLE `survey` ADD `sheet_count` INT NOT NULL DEFAULT '0' COMMENT '答卷�
 ALTER TABLE `answer` DROP `answer`;
 CREATE TABLE `survey`.`answer_option` ( `id` INT NOT NULL AUTO_INCREMENT , `answer_id` INT NOT NULL , `option_id` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;
 CREATE TABLE `survey`.`answer_content` ( `id` INT NOT NULL AUTO_INCREMENT , `answer_id` INT NOT NULL , `content` TEXT NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;
+
+ALTER TABLE `survey` ADD `integral` INT NOT NULL DEFAULT '0' COMMENT '求助分' AFTER `description`;
+ALTER TABLE `user` CHANGE `integral` `integral` INT(11) UNSIGNED NULL DEFAULT '0' COMMENT '积分';
