@@ -81,7 +81,7 @@ function camelToUnderLineArr($fields)
 function underLineArrTOCamel($fields)
 {
     $newArr = [];
-    if (!is_array($fields) || !$fields) return null;
+    if (!is_array($fields) || !$fields) return [];
     foreach ($fields as $key => $v) {
         if(is_array($v)){
             $v = underLineArrTOCamel($v);

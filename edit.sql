@@ -9,3 +9,12 @@ CREATE TABLE `survey`.`answer_content` ( `id` INT NOT NULL AUTO_INCREMENT , `ans
 
 ALTER TABLE `survey` ADD `integral` INT NOT NULL DEFAULT '0' COMMENT '求助分' AFTER `description`;
 ALTER TABLE `user` CHANGE `integral` `integral` INT(11) UNSIGNED NULL DEFAULT '0' COMMENT '积分';
+
+ALTER TABLE `question` ADD `count_poll` INT NOT NULL DEFAULT '0' COMMENT '总票数，用于统计' AFTER `sort`;
+ALTER TABLE `question` ADD `count_participant` INT NOT NULL DEFAULT '0' COMMENT '参与者人数' AFTER `count_poll`;
+CREATE TABLE `feedback` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `content` varchar(255) NOT NULL COMMENT '内容',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -15,4 +15,12 @@ class AnswerSheet extends Base
     {
         return $this->hasMany('Answer', 'answer_sheet_id');
     }
+
+    public function bindSurvey()
+    {
+        return $this->belongsTo('Survey', 'survey_id')
+            ->bind([
+                'name'
+            ]);
+    }
 }

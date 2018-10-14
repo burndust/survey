@@ -18,9 +18,20 @@ class Question extends Base
         return show([]);
     }
 
-    public function answerList($id){
-        $result = Answer::all(['question_id' => $id],['bindContent']);
-        $result = $result ? collection($result)->toArray() : [];
+    public function answerList($id, $page = 1)
+    {
+        $pageSize = empty($this->params['page_size']) ? config('paginate.list_rows') : $this->params['page_size'];
+        $where    = ['question_id' => $id];
+        $hidden   = ['id', 'question_id', 'answer_sheet_id'];
+        $list     = Answer::all(function ($query) use ($where, $page, $pageSize) {
+            $query->where($where)->page($page, $pageSize);
+        }, ['bindContent']);
+        $list     = $list ? collection($list)->hidden($hidden)->toArray() : [];
+        $count    = Answer::where($where)->count();
+        $result   = [
+            'list'  => $list,
+            'count' => $count,
+        ];
         return show($result);
     }
 }

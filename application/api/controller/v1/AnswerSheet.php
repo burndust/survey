@@ -12,6 +12,7 @@ use app\common\model\Answer;
 use app\common\model\AnswerSheet as AnswerSheetModel;
 use app\common\model\QuestionOption;
 use app\common\model\Survey;
+use app\common\model\Question;
 use think\Db;
 
 class AnswerSheet extends Base
@@ -25,22 +26,32 @@ class AnswerSheet extends Base
         AnswerSheetModel::startTrans();
         try {
             $answerSheet = AnswerSheetModel::Create($data);
-            $questions   = $this->params['questions'];
-            $pollList = [];
-            foreach ($questions as $k => $v) {
-                $answer = Answer::create([
+            $answers     = $this->params['answers'];
+            $pollList    = [];
+            foreach ($answers as $k => $v) {
+                $answer    = Answer::create([
                     'answer_sheet_id' => $answerSheet['id'],
                     'question_id'     => $v['id'],
                 ]);
-                if (!empty($v['selected_list'])){
-                    $option = [];
-                    foreach ($v['selected_list'] as $vk => $vv){
-                        $pollList[] = $vv;
-                        $option[] = ['option_id' => $vv];
+                $countPoll = 0;
+                if (!empty($v['content'])) {
+                    if (in_array($v['type'], [1, 2]) && is_array($v['content'])) {
+                        $option = [];
+                        foreach ($v['content'] as $vk => $vv) {
+                            $pollList[] = $vv;
+                            $option[]   = ['option_id' => $vv];
+                        }
+                        $countPoll = count($v['content']);
+                        $answer->option()->saveAll($option);
+                    } elseif (3 == $v['type']) {
+                        $answer->bindContent()->save(['content' => $v['content'][0]]);
                     }
-                    $answer->option()->saveAll($option);
                 }
-                if (!empty($v['content'])) $answer->content()->save(['content' => $v['content']]);
+                Question::where(['id' => $v['id']])
+                    ->update([
+                        'count_poll'        => Db::raw('count_poll+' . $countPoll),
+                        'count_participant' => Db::raw('count_participant+1'),
+                    ]);
             }
             $this->user->save(['integral' => $this->user['integral'] + 1]);
             Survey::where(['id' => $this->params['survey_id']])
@@ -52,5 +63,22 @@ class AnswerSheet extends Base
             AnswerSheetModel::rollback();
             throw new \Exception($e->getFile() . $e->getLine() . ':' . $e->getMessage());
         }
+    }
+
+    public function index($page = 1)
+    {
+        $pageSize = empty($this->params['page_size']) ? config('paginate.list_rows') : $this->params['page_size'];
+        $where    = ['user_id' => $this->user['id']];
+        $hidden   = ['user_id', 'survey_id'];
+        $list     = AnswerSheetModel::all(function ($query) use ($where, $page, $pageSize) {
+            $query->where($where)->page($page, $pageSize);
+        }, ['bindSurvey']);
+        $list     = $list ? collection($list)->hidden($hidden)->toArray() : [];
+        $count    = AnswerSheetModel::where($where)->count();
+        $result   = [
+            'list'  => $list,
+            'count' => $count,
+        ];
+        return show($result);
     }
 }

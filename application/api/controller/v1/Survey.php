@@ -19,10 +19,38 @@ use think\Db;
 
 class Survey extends Base
 {
-    public function index()
+    public function index($page = 1)
     {
-        $result = SurveyModel::all(['user_id' => $this->user['id']]);
-        $result = $result ? collection($result)->toArray() : [];
+        $pageSize = empty($this->params['page_size']) ? config('paginate.list_rows') : $this->params['page_size'];
+        $where    = ['user_id' => $this->user['id']];
+        $list     = SurveyModel::all(function ($query) use ($where, $page, $pageSize) {
+            $query->where($where)->page($page, $pageSize);
+        });
+        $list     = $list ? collection($list)->toArray() : [];
+        $count    = SurveyModel::where($where)->count();
+        $result   = [
+            'list'  => $list,
+            'count' => $count,
+        ];
+        return show($result);
+    }
+
+    public function search($word, $page = 1)
+    {
+        $pageSize = empty($this->params['page_size']) ? config('paginate.list_rows') : $this->params['page_size'];
+        $where    = [
+            'user_id' => $this->user['id'],
+            'name'    => ['like', "%{$word}%"],
+        ];
+        $list     = SurveyModel::all(function ($query) use ($where, $page, $pageSize) {
+            $query->where($where)->page($page, $pageSize);
+        });
+        $list     = $list ? collection($list)->toArray() : [];
+        $count    = SurveyModel::where($where)->count();
+        $result   = [
+            'list'  => $list,
+            'count' => $count,
+        ];
         return show($result);
     }
 
@@ -98,7 +126,7 @@ class Survey extends Base
                 $question       = Question::create($v, true);
                 if (!empty($v['option'])) $question->option()->saveAll($v['option']);
             }
-            if(!empty($this->params['question_del_list'])){
+            if (!empty($this->params['question_del_list'])) {
                 Question::destroy($this->params['question_del_list']);
             }
             if (!empty($this->params['question_del_list'])) Question::destroy($this->params['question_del_list']);
@@ -114,8 +142,25 @@ class Survey extends Base
         }
     }
 
-    public function info($id){
-        $result = SurveyModel::get($id,['questions' => function($query){
+    public function info($id)
+    {
+        $result = SurveyModel::get($id, ['questions' => function ($query) {
+            $query->with(['option'])->order('sort');
+        }])->toArray();
+        return show($result);
+    }
+
+    public function fill($id)
+    {
+        $where = [
+            'user_id'   => $this->user['id'],
+            'survey_id' => $id
+        ];
+        $sheet = AnswerSheet::get($where);
+        if ($sheet) {
+            throw new BaseException('您已填写过该问卷', self::HAD_ANSWERED, 200);
+        }
+        $result = SurveyModel::get($id, ['questions' => function ($query) {
             $query->with(['option'])->order('sort');
         }])->toArray();
         return show($result);
@@ -137,15 +182,6 @@ class Survey extends Base
         $result = Question::all(function ($query) use ($id) {
             $query->where(['survey_id' => $id])->order('sort');
         }, ['option']);
-        foreach ($result as $k => $v) {
-            if (!empty($v['option'])) {
-                $count = 0;
-                foreach ($v['option'] as $vv) {
-                    $count += $vv['poll'];
-                }
-                $v['count'] = $count;
-            }
-        }
         $result = $result ? collection($result)->toArray() : [];
         return show($result);
     }
@@ -160,5 +196,42 @@ class Survey extends Base
         SurveyModel::where(['id' => $id])
             ->update(['integral' => Db::raw('integral+' . $this->params['integral'])]);
         return show([]);
+    }
+
+    public function helpList()
+    {
+        $pageSize = empty($this->params['page_size']) ? config('paginate.list_rows') : $this->params['page_size'];
+        $where    = [
+            'status'   => 1,
+            'integral' => ['GT', 0]
+        ];
+        $count    = SurveyModel::where($where)->count();
+        if (0 == $count) {
+            throw new BaseException('没有需要帮助的问卷', self::RECORD_NOT_FOUND);
+        } elseif ($count <= $pageSize) {
+            $result = SurveyModel::all(function ($query) use ($where) {
+                $query->where($where);
+            });
+        } else {
+            $ids  = SurveyModel::where($where)->column('id');
+            $in   = [];
+            $take = [];
+            $i    = 0;
+            while ($i < $pageSize) {
+                $rand = mt_rand(0, $count - 1);
+                if (in_array($rand, $take)) {
+                    continue;
+                }
+                $take[] = $rand;
+                $in[]   = $ids[$rand];
+                ++$i;
+            }
+            $result = SurveyModel::all(function ($query) use ($in) {
+                $query->where(['id' => ['in', $in]]);
+            });
+        }
+        $hidden = ['integral', 'status', 'sheet_count'];
+        $result = collection($result)->hidden($hidden)->toArray();
+        return show($result);
     }
 }

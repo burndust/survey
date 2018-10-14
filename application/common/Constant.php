@@ -17,4 +17,5 @@ interface Constant
     const EMAIL_SEND_FAIL = 10000;
     const RECORD_NOT_FOUND = 10001;
     const INTEGRAL_NOT_WORTH = 10002;
+    const HAD_ANSWERED = 10003;
 }
