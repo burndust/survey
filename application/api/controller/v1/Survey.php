@@ -182,7 +182,16 @@ class Survey extends Base
         $result = Question::all(function ($query) use ($id) {
             $query->where(['survey_id' => $id])->order('sort');
         }, ['option']);
-        $result = $result ? collection($result)->toArray() : [];
+        if ($result) {
+            $result = collection($result)->toArray();
+            foreach ($result as $k => &$v) {
+                if (!empty($v['option'])) {
+                    foreach ($v['option'] as $kk => &$vv) {
+                        $vv['percent'] = $vv['poll'] ? round($vv['poll'] / $v['count_participant'] * 100) : 0;
+                    }
+                }
+            }
+        }
         return show($result);
     }
 

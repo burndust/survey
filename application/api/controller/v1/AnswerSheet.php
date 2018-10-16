@@ -33,7 +33,6 @@ class AnswerSheet extends Base
                     'answer_sheet_id' => $answerSheet['id'],
                     'question_id'     => $v['id'],
                 ]);
-                $countPoll = 0;
                 if (!empty($v['content'])) {
                     if (in_array($v['type'], [1, 2]) && is_array($v['content'])) {
                         $option = [];
@@ -41,7 +40,6 @@ class AnswerSheet extends Base
                             $pollList[] = $vv;
                             $option[]   = ['option_id' => $vv];
                         }
-                        $countPoll = count($v['content']);
                         $answer->option()->saveAll($option);
                     } elseif (3 == $v['type']) {
                         $answer->bindContent()->save(['content' => $v['content'][0]]);
@@ -49,7 +47,6 @@ class AnswerSheet extends Base
                 }
                 Question::where(['id' => $v['id']])
                     ->update([
-                        'count_poll'        => Db::raw('count_poll+' . $countPoll),
                         'count_participant' => Db::raw('count_participant+1'),
                     ]);
             }
