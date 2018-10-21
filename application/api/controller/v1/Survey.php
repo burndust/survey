@@ -15,6 +15,7 @@ use app\common\model\Survey as SurveyModel;
 use app\common\model\Question;
 use app\common\model\AnswerSheet;
 use app\common\validate\IntegralValidate;
+use EasyWeChat\Factory;
 use think\Db;
 
 class Survey extends Base
@@ -242,5 +243,23 @@ class Survey extends Base
         $hidden = ['integral', 'status', 'sheet_count'];
         $result = collection($result)->hidden($hidden)->toArray();
         return show($result);
+    }
+
+    public function miniCode($id)
+    {
+        $app      = Factory::miniProgram(config('easywechat.miniprogram'));
+        $response = $app->app_code->getUnlimit($id, [
+            'page' => 'pages/preview/preview'
+        ]);
+        // $response 成功时为 EasyWeChat\Kernel\Http\StreamResponse 实例，失败为数组或你指定的 API 返回类型
+
+        // 保存小程序码到文件
+        $directory = 'static/image/minicode';
+        if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
+            $filename = $response->save($directory);
+            $file     = base64_encode(file_get_contents($directory . '/' . $filename));
+            @unlink($directory . '/' . $filename);
+            return show(['image' => $file]);
+        }
     }
 }

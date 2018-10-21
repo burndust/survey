@@ -21,6 +21,7 @@ Route::group('api/:version',function(){
         Route::get('/:id/sheets', 'api/:version.survey/sheets', [], ['id' => '\d+']);
         Route::get('/:id/statistics', 'api/:version.survey/statistics', [], ['id' => '\d+']);
         Route::post('/:id/call', 'api/:version.survey/call', [], ['id' => '\d+']);
+        Route::get('/:id/mini_code', 'api/:version.survey/miniCode', [], ['id' => '\d+']);
     });
     Route::group('/question',function(){
         Route::resource('','api/:version.question');
