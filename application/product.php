@@ -48,5 +48,10 @@ return [
                 'file' => __DIR__.'/wechat.log',
             ],*/
         ]
+    ],
+    'aip_image' => [
+        'app_id' => '',
+        'api_key' => '',
+        'secret' => '',
     ]
 ];

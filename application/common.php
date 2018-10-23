@@ -56,28 +56,8 @@ function camelToUnderLineArr($fields)
 
 /***
  * @param $fields [] 下划线数组
- * @return \stdClass
+ * @return array
  */
-//function underLineArrTOCamel($fields)
-//{
-//    /*if(is_object($fields)){
-//        $fields = $fields->toArray();
-//    }*/
-//    $newObj = new \stdClass();
-//    if (!is_array($fields) || !$fields) return null;
-//    foreach ($fields as $key => $v) {
-//        if(is_array($v)){
-//            $v = underLineArrTOCamel($v);
-//        }
-//        $keyTmp          = array_reduce(explode('_', $key), function ($v1, $v2) {
-//            return ucfirst($v1) . ucfirst($v2);
-//        });
-//        $keyTmp          = lcfirst($keyTmp);
-//        $newObj->$keyTmp = $v;
-//        unset($fields[$key]);
-//    }
-//    return $newObj;
-//}
 function underLineArrTOCamel($fields)
 {
     $newArr = [];
@@ -99,4 +79,9 @@ function underLineArrTOCamel($fields)
 function getMillisecond(){
     list($t1, $t2) = explode(' ', microtime());
     return $t2 . ceil($t1 * 1000);
+}
+
+function initAipImageCensor(){
+    $aipImage = config('aip_image');
+    return new \AipImageCensor\AipImageCensor($aipImage['app_id'],$aipImage['api_key'],$aipImage['secret']);
 }
