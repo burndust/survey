@@ -43,6 +43,13 @@ function camelToUnderLineArr($fields)
     if (!is_object($fields) || !get_object_vars($fields)) return $newArr;
 
     foreach ($fields as $key => &$v) {
+        if(in_array($key,['name','description','content'])){
+            $client = initAipImageCensor();
+            $body = $client->antiSpam($v);
+            if(isset($body['result']['spam']) && $body['result']['spam']){
+                throw new \app\common\exception\ContentException();
+            }
+        }
         if(is_array($v)){
             $v = camelToUnderLineArr($v);
         }
