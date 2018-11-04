@@ -63,11 +63,11 @@ class Base extends Controller implements Constant
         // 传给前端的为加密的token,存储在缓存中的为未加密前的token $encrypt = encrypt($token . '||' . $userId)
         $token = (new Aes())->decrypt($header['token']);
         if (empty($token) || !preg_match('/||/', $token)) {
-            throw new ParameterException('token无效');
+            throw new ParameterException('token无效', self::TOKEN_INVALID);
         }
         list($token, $id) = explode("||", $token);
         if (!Cache::get($token)) {
-            throw new ParameterException('token不存在');
+            throw new ParameterException('token不存在', self::TOKEN_INVALID);
         }
         $user = User::get($id);
         if (!$user) {
