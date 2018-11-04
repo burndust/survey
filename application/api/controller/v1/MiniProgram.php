@@ -32,7 +32,7 @@ class MiniProgram extends Base
      */
     /*public function login($code, $rawData = '', $signature = '')
     {
-        $miniProgram = new \MiniProgramLib(config('miniprogram'));
+        $miniProgram = new \MiniProgram(config('easywechat.miniprogram'));
         $response = $miniProgram->login($code);
         //校验签名
         $checkSignature = sha1($rawData.$response['session_key']);

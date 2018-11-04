@@ -20,10 +20,10 @@
  */
 function show($data, $code = 0, $message = 'ok', $statusCode = 200)
 {
-    $data = $data?underLineArrTOCamel($data):$data;
+    $data = $data ? underLineArrTOCamel($data) : [];
     $data = [
         'code'    => empty($code) ? config('code.success') : $code,
-        'message' => $message,
+        'message' => $message ? $message : 'ok',
         'data'    => $data,
     ];
 
@@ -36,21 +36,22 @@ function show($data, $code = 0, $message = 'ok', $statusCode = 200)
  */
 function camelToUnderLineArr($fields)
 {
-    if(is_array($fields)){
-        $fields = (object) $fields;
+    if (is_array($fields)) {
+        $fields = (object)$fields;
     }
     $newArr = [];
     if (!is_object($fields) || !get_object_vars($fields)) return $newArr;
 
     foreach ($fields as $key => &$v) {
-        if(in_array($key,['name','description','content'])){
+        if (in_array($key, ['name', 'description', 'content'])) {
             $client = initAipImageCensor();
-            $body = $client->antiSpam($v);
-            if(isset($body['result']['spam']) && $body['result']['spam']){
+            $body   = $client->antiSpam($v);
+            if (isset($body['result']['spam']) && $body['result']['spam']) {
                 throw new \app\common\exception\ContentException();
             }
+            $v = trim($v);
         }
-        if(is_array($v)){
+        if (is_array($v)) {
             $v = camelToUnderLineArr($v);
         }
         $keyTmp          = strtolower(preg_replace('/((?<=[a-z])(?=[A-Z]))/', '_', $key));
@@ -70,7 +71,7 @@ function underLineArrTOCamel($fields)
     $newArr = [];
     if (!is_array($fields) || !$fields) return [];
     foreach ($fields as $key => $v) {
-        if(is_array($v)){
+        if (is_array($v)) {
             $v = underLineArrTOCamel($v);
         }
         $keyTmp          = array_reduce(explode('_', $key), function ($v1, $v2) {
@@ -83,12 +84,14 @@ function underLineArrTOCamel($fields)
     return $newArr;
 }
 
-function getMillisecond(){
+function getMillisecond()
+{
     list($t1, $t2) = explode(' ', microtime());
     return $t2 . ceil($t1 * 1000);
 }
 
-function initAipImageCensor(){
+function initAipImageCensor()
+{
     $aipImage = config('aip_image');
-    return new \AipImageCensor\AipImageCensor($aipImage['app_id'],$aipImage['api_key'],$aipImage['secret']);
+    return new \AipImageCensor\AipImageCensor($aipImage['app_id'], $aipImage['api_key'], $aipImage['secret']);
 }

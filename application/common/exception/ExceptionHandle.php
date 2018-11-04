@@ -26,7 +26,7 @@ class ExceptionHandle extends Handle implements Constant
             Log::init([
                 'type'  => 'File',
                 'path'  => LOG_PATH,
-                'level' => ['sql', 'error'],
+                'level' => ['sql', 'error', 'info'],
             ]);
             Log::record($e->getFile() . ':' . $e->getLine(), 'error');
             if (config('app_debug')) {

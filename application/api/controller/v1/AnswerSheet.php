@@ -27,13 +27,15 @@ class AnswerSheet extends Base
         try {
             $answerSheet = AnswerSheetModel::Create($data);
             $answers     = $this->params['answers'];
-            $pollList    = [];
-            foreach ($answers as $k => $v) {
+            $pollList    = [];//保存选中的选项
+
+            foreach ($answers as $v) {
                 $answer    = Answer::create([
                     'answer_sheet_id' => $answerSheet['id'],
                     'question_id'     => $v['id'],
                 ]);
                 if (!empty($v['content'])) {
+                    //判断是选择题还是问答题，选择题需要保存选中的选项，问答题需要保存回答内容
                     if (in_array($v['type'], [1, 2]) && is_array($v['content'])) {
                         $option = [];
                         foreach ($v['content'] as $vk => $vv) {
@@ -50,15 +52,16 @@ class AnswerSheet extends Base
                         'count_participant' => Db::raw('count_participant+1'),
                     ]);
             }
+            //回答的用户积分+1，该问卷答卷数+1，选中选项投票数+1
             $this->user->save(['integral' => $this->user['integral'] + 1]);
             Survey::where(['id' => $this->params['survey_id']])
                 ->update(['sheet_count' => Db::raw('sheet_count+1')]);
             $pollList && QuestionOption::where(['id' => ['in',$pollList]])->update(['poll' => Db::raw('poll+1')]);
             AnswerSheetModel::commit();
-            return show([]);
+            return show([], 0, '', 201);
         } catch (\Exception $e) {
             AnswerSheetModel::rollback();
-            throw new \Exception($e->getFile() . $e->getLine() . ':' . $e->getMessage());
+            throw new \Exception($e->getCode() . ':' . $e->getMessage());
         }
     }
 

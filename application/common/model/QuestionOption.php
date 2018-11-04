@@ -8,8 +8,11 @@
 
 namespace app\common\model;
 
+use traits\model\SoftDelete;
 
 class QuestionOption extends Base
 {
+    use SoftDelete;
+    protected $autoWriteTimestamp = true;
     protected $hidden = ['question_id'];
 }

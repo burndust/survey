@@ -15,6 +15,7 @@ use app\common\model\Survey as SurveyModel;
 use app\common\model\Question;
 use app\common\model\AnswerSheet;
 use app\common\validate\IntegralValidate;
+use app\common\validate\NameValidate;
 use EasyWeChat\Factory;
 use think\Db;
 
@@ -55,11 +56,12 @@ class Survey extends Base
         return show($result);
     }
 
-    public function save($name, $description)
+    public function save($name)
     {
+        new NameValidate();
         $this->params['user_id'] = $this->user['id'];
         $result                  = SurveyModel::create($this->params, true);
-        return show(['id' => $result['id']]);
+        return show(['id' => $result['id']], 0, '', 201);
     }
 
     public function read($id)
@@ -73,13 +75,13 @@ class Survey extends Base
         $allowField = ['status'];
         $survey     = SurveyModel::get($id);
         $survey->allowField($allowField)->save($this->params);
-        return show([]);
+        return show([], 0, '', 202);
     }
 
     public function delete($id)
     {
         SurveyModel::destroy($id);
-        return show([]);
+        return show([], 0, '', 204);
     }
 
     public function questions($id)
@@ -127,16 +129,14 @@ class Survey extends Base
                 $question       = Question::create($v, true);
                 if (!empty($v['option'])) $question->option()->saveAll($v['option']);
             }
-            if (!empty($this->params['question_del_list'])) {
-                Question::destroy($this->params['question_del_list']);
-            }
             if (!empty($this->params['question_del_list'])) Question::destroy($this->params['question_del_list']);
             if (!empty($this->params['option_del_list'])) QuestionOption::destroy($this->params['option_del_list']);
             Question::commit();
+
             $result = SurveyModel::get($id, ['questions' => function ($query) {
                 $query->with(['option'])->order('sort');
             }])->toArray();
-            return show($result);
+            return show($result, 0, '', 201);
         } catch (\Exception $e) {
             Question::rollback();
             throw new \Exception($e->getMessage());
@@ -217,7 +217,7 @@ class Survey extends Base
         ];
         $count    = SurveyModel::where($where)->count();
         if (0 == $count) {
-            throw new BaseException('没有需要帮助的问卷', self::RECORD_NOT_FOUND);
+            throw new BaseException('没有需要帮助的问卷', self::RECORD_NOT_FOUND, 404);
         } elseif ($count <= $pageSize) {
             $result = SurveyModel::all(function ($query) use ($where) {
                 $query->where($where);

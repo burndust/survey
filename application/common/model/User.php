@@ -8,8 +8,10 @@
 
 namespace app\common\model;
 
+use traits\model\SoftDelete;
 
 class User extends Base
 {
-
+    use SoftDelete;
+    protected $autoWriteTimestamp = true;
 }

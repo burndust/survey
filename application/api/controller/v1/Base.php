@@ -26,11 +26,12 @@ class Base extends Controller implements Constant
      */
     protected $user = [];
     /**
-     * 是否检测登录状态
+     * 是否检测登录状态,本地测试时关闭，上线状态为打开
      * @var bool
      */
     protected $checkLogin = false;
     protected $params;
+
     /**
      * 初始化
      *
@@ -38,9 +39,9 @@ class Base extends Controller implements Constant
     public function __construct(Request $request = null)
     {
         parent::__construct($request);
-        $this->user = User::get(4);
+        $this->user = User::get(4);//上线状态需将此段内容注释掉
         $this->checkLogin && $this->isLogin();
-        $method = request()->method();
+        $method       = request()->method();
         $this->params = camelToUnderLineArr(request()->$method());
     }
 
@@ -49,27 +50,28 @@ class Base extends Controller implements Constant
      * @return bool
      * @throws ParameterException
      */
-    public function isLogin() {
+    public function isLogin()
+    {
         $header = request()->header();
-        if(empty($header['token']) || empty($header['time']) || empty($header['signature'])) {
+        if (empty($header['token']) || empty($header['time']) || empty($header['signature'])) {
             throw new ParameterException('header头部信息缺少参数');
         }
-        if(!Token::checkSignature($header)) {
-            throw new ParameterException('signature验证失败', self::SIGNATURE_FAIL , 401);
+        if (!Token::checkSignature($header)) {
+            throw new ParameterException('signature验证失败', self::SIGNATURE_FAIL, 401);
         }
         Cache::set($header['signature'], 1, config('signature_cache_time'));
         // 传给前端的为加密的token,存储在缓存中的为未加密前的token $encrypt = encrypt($token . '||' . $userId)
         $token = (new Aes())->decrypt($header['token']);
-        if(empty($token) || !preg_match('/||/', $token)) {
+        if (empty($token) || !preg_match('/||/', $token)) {
             throw new ParameterException('token无效');
         }
         list($token, $id) = explode("||", $token);
-        if(!Cache::get($token)){
+        if (!Cache::get($token)) {
             throw new ParameterException('token不存在');
         }
         $user = User::get($id);
-        if(!$user) {
-            throw new BaseException('用户不存在',self::RECORD_NOT_FOUND);
+        if (!$user) {
+            throw new BaseException('用户不存在', self::RECORD_NOT_FOUND, 404);
         }
         $this->user = $user;
 
@@ -97,7 +99,7 @@ class Base extends Controller implements Constant
         }
         $user = User::get($id);
         if(!$user || $user->status != 1) {
-            throw new BaseException('用户不存在',self::RECORD_NOT_FOUND);
+            throw new BaseException('用户不存在',self::RECORD_NOT_FOUND, 404);
         }
         $this->user = $user;
 

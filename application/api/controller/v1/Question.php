@@ -13,9 +13,10 @@ use app\common\model\Question as QuestionModel;
 
 class Question extends Base
 {
-    public function delete($id){
+    public function delete($id)
+    {
         QuestionModel::destroy($id);
-        return show([]);
+        return show([], 0, '', 204);
     }
 
     public function answerList($id, $page = 1)

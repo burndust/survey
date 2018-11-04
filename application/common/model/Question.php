@@ -8,9 +8,13 @@
 
 namespace app\common\model;
 
+use traits\model\SoftDelete;
 
 class Question extends Base
 {
+    use SoftDelete;
+    protected $autoWriteTimestamp = true;
+
     public function option(){
         return $this->hasMany('QuestionOption','question_id');
     }

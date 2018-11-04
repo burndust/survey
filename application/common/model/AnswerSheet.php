@@ -8,9 +8,13 @@
 
 namespace app\common\model;
 
+use traits\model\SoftDelete;
 
 class AnswerSheet extends Base
 {
+    use SoftDelete;
+    protected $autoWriteTimestamp = true;
+
     public function answers()
     {
         return $this->hasMany('Answer', 'answer_sheet_id');

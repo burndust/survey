@@ -58,30 +58,4 @@ class BaseValidate extends Validate
             return $field . '手机号格式不正确';
         }
     }
-
-
-//    // 令牌合法并不代表操作也合法
-//    // 需要验证一致性
-//    protected function isUserConsistency($value, $rule, $data, $field)
-//    {
-//        $identities = getCurrentIdentity(['uid', 'power']);
-//        extract($identities);
-//
-//        // 如果当前令牌是管理员令牌，则允许令牌UID和操作UID不同
-//        if ($power == ScopeEnum::Super) {
-//            return true;
-//        }
-//        else {
-//            if ($value == $uid) {
-//                return true;
-//            }
-//            else {
-//                throw new TokenException([
-//                                             'msg' => '你怎么可以用自己的令牌操作别人的数据？',
-//                                             'code' => 403,
-//                                             'errorCode' => '10003'
-//                                         ]);
-//            }
-//        }
-//   }
 }
