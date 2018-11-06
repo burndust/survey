@@ -49,7 +49,7 @@ function camelToUnderLineArr($fields)
             if (isset($body['result']['spam']) && $body['result']['spam']) {
                 throw new \app\common\exception\ContentException();
             }
-            $v = trim($v);
+            if (is_string($v)) $v = trim($v);
         }
         if (is_array($v)) {
             $v = camelToUnderLineArr($v);
