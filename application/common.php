@@ -44,6 +44,12 @@ function camelToUnderLineArr($fields)
 
     foreach ($fields as $key => &$v) {
         if (in_array($key, ['name', 'description', 'content'])) {
+//            $app      = \EasyWeChat\Factory::miniProgram(config('easywechat.miniprogram'));
+//            $result = $app->content_security->checkText($v);
+//            if(isset($result['errcode']) && 87014 == $result['errcode']){
+//                throw new \app\common\exception\ContentException();
+//            }
+
             $client = initAipImageCensor();
             $body   = $client->antiSpam($v);
             if (isset($body['result']['spam']) && $body['result']['spam']) {
