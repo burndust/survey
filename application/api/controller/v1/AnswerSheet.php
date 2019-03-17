@@ -68,13 +68,15 @@ class AnswerSheet extends Base
     public function index($page = 1)
     {
         $pageSize = empty($this->params['page_size']) ? config('paginate.list_rows') : $this->params['page_size'];
-        $where    = ['user_id' => $this->user['id']];
-        $hidden   = ['user_id', 'survey_id'];
-        $list     = AnswerSheetModel::all(function ($query) use ($where, $page, $pageSize) {
-            $query->where($where)->page($page, $pageSize);
-        }, ['bindSurvey']);
-        $list     = $list ? collection($list)->hidden($hidden)->toArray() : [];
-        $count    = AnswerSheetModel::where($where)->count();
+        $where    = ['a.user_id' => $this->user['id']];
+        $list     = AnswerSheetModel::alias('a')
+            ->field('a.id,a.create_time,s.name')
+            ->join('survey s', 'a.survey_id = s.id')
+            ->where($where)
+            ->page($page, $pageSize)
+            ->select();
+        $list     = $list ? collection($list)->toArray() : [];
+        $count    = AnswerSheetModel::alias('a')->where($where)->count();
         $result   = [
             'list'  => $list,
             'count' => $count,

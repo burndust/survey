@@ -26,7 +26,7 @@ class Survey extends Base
         $pageSize = empty($this->params['page_size']) ? config('paginate.list_rows') : $this->params['page_size'];
         $where    = ['user_id' => $this->user['id']];
         $list     = SurveyModel::all(function ($query) use ($where, $page, $pageSize) {
-            $query->where($where)->page($page, $pageSize);
+            $query->order('create_time desc')->where($where)->page($page, $pageSize);
         });
         $list     = $list ? collection($list)->toArray() : [];
         $count    = SurveyModel::where($where)->count();

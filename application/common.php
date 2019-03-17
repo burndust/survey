@@ -43,20 +43,14 @@ function camelToUnderLineArr($fields)
     if (!is_object($fields) || !get_object_vars($fields)) return $newArr;
 
     foreach ($fields as $key => &$v) {
-        if (in_array($key, ['name', 'description', 'content'])) {
-//            $app      = \EasyWeChat\Factory::miniProgram(config('easywechat.miniprogram'));
-//            $result = $app->content_security->checkText($v);
-//            if(isset($result['errcode']) && 87014 == $result['errcode']){
-//                throw new \app\common\exception\ContentException();
-//            }
-
-            $client = initAipImageCensor();
-            $body   = $client->antiSpam($v);
-            if (isset($body['result']['spam']) && $body['result']['spam']) {
+        if (is_string($v) && in_array($key, ['name', 'description', 'content'])) {
+            $app    = \EasyWeChat\Factory::miniProgram(config('easywechat.miniprogram'));
+            $result = $app->content_security->checkText($v);
+            if (isset($result['errcode']) && 87014 == $result['errcode']) {
                 throw new \app\common\exception\ContentException();
             }
-            if (is_string($v)) $v = trim($v);
         }
+        if (is_string($v)) $v = trim($v);
         if (is_array($v)) {
             $v = camelToUnderLineArr($v);
         }
